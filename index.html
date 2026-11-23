@@ -8,6 +8,7 @@
         :root {
             --primary: #0f172a;
             --primary-accent: #0284c7;
+            --whatsapp-green: #16a34a;
             --bg-body: #f8fafc;
             --card-bg: #ffffff;
             --border-color: #e2e8f0;
@@ -141,11 +142,21 @@
 
         /* Coluna 1: Setor/Secretaria */
         .col-setor {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-size: 0.95rem;
             font-weight: 600;
             color: var(--primary);
             padding-right: 16px;
             line-height: 1.3;
+        }
+
+        .whats-badge {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            color: #25D366;
         }
 
         /* Coluna 2: Telefone */
@@ -174,6 +185,18 @@
             background-color: var(--primary-accent);
             color: #ffffff;
             border-color: var(--primary-accent);
+        }
+
+        .phone-btn.whatsapp {
+            color: var(--whatsapp-green);
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .phone-btn.whatsapp:hover {
+            background-color: var(--whatsapp-green);
+            color: #ffffff;
+            border-color: var(--whatsapp-green);
         }
 
         /* Estado vazio */
@@ -250,10 +273,14 @@
             { setor: "Secretaria de Obras, Transportes e Serviços Públicos", contato: "(48) 3263-8186" },
             { setor: "Secretaria de Saúde", contato: "(48) 3263-5859" },
 
-            // 2. Tributos logo após as Secretarias
+            // 2. Plantão / Plantões logo abaixo das Secretarias
+            { setor: "Plantão Conselho Tutelar", contato: "(48) 99982-2531" },
+            { setor: "Plantão SAMAE", contato: "(48) 3220-0713", whatsapp: true },
+
+            // 3. Tributos
             { setor: "Tributos - IPTU - ITBI", contato: "(48) 3263-8177" },
 
-            // 3. Demais setores em ordem alfabética
+            // 4. Demais setores em ordem alfabética
             { setor: "CRAS", contato: "(48) 3263-6194" },
             { setor: "Chefe de Gabinete (Prefeito)", contato: "(48) 3263-8119" },
             { setor: "Conselho Tutelar", contato: "(48) 3263-4782" },
@@ -265,7 +292,6 @@
             { setor: "Fiscalização de Tributos", contato: "(48) 3263-8113" },
             { setor: "Fundação Municipal de Esportes (FME)", contato: "(48) 3263-8194" },
             { setor: "Identidade", contato: "(48) 3263-7407" },
-            { setor: "Plantão Conselho Tutelar", contato: "(48) 99982-2531" },
             { setor: "Previserti", contato: "(48) 3263-5896" },
             { setor: "Procon de Tijucas", contato: "(48) 3263-6378" },
             { setor: "Recepção do Gabinete do Prefeito", contato: "(48) 3263-8107" },
@@ -273,6 +299,12 @@
             { setor: "SINE", contato: "(48) 3263-8191" },
             { setor: "Setor de Iluminação e Manutenção de Ruas", contato: "(48) 3263-8186" }
         ];
+
+        const whatsappSvg = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.758.458 3.475 1.328 4.988L2 22l5.188-1.359a9.927 9.927 0 0 0 4.843 1.258h.004c5.515 0 9.969-4.454 9.969-9.969 0-2.664-1.037-5.168-2.922-7.052A9.903 9.903 0 0 0 12.031 2zm5.82 14.274c-.246.691-1.43 1.32-1.977 1.402-.504.076-1.141.108-1.841-.114-.425-.135-.97-.316-1.668-.617-2.936-1.267-4.853-4.222-5-4.418-.146-.195-1.193-1.588-1.193-3.03 0-1.441.756-2.15 1.024-2.443.268-.293.586-.366.781-.366.195 0 .391.002.562.01.18.009.422-.068.66.503.244.586.83 2.026.903 2.173.073.146.122.317.024.512-.098.195-.146.317-.293.488-.146.171-.308.382-.439.512-.146.146-.299.305-.128.598.171.293.759 1.252 1.63 2.028 1.12.999 2.064 1.309 2.357 1.455.293.146.464.122.635-.073.171-.195.732-.854.927-1.147.195-.293.391-.244.659-.146.268.098 1.708.805 2.001.952.293.146.488.22.561.342.073.122.073.707-.173 1.398z"/>
+            </svg>
+        `;
 
         const searchBox = document.getElementById('searchBox');
         const listRows = document.getElementById('listRows');
@@ -302,11 +334,20 @@
             dados.forEach(item => {
                 const row = document.createElement('div');
                 row.className = 'table-row';
+                const digits = cleanPhone(item.contato);
+                const href = item.whatsapp ? `https://wa.me/55${digits}` : `tel:+55${digits}`;
+                const targetAttr = item.whatsapp ? `target="_blank" rel="noopener noreferrer"` : '';
+                const btnClass = item.whatsapp ? 'phone-btn whatsapp' : 'phone-btn';
+                const whatsIcon = item.whatsapp ? `<span class="whats-badge" title="Atendimento via WhatsApp">${whatsappSvg}</span>` : '';
+
                 row.innerHTML = `
-                    <div class="col-setor">${item.setor}</div>
+                    <div class="col-setor">
+                        <span>${item.setor}</span>
+                        ${whatsIcon}
+                    </div>
                     <div class="col-telefone">
-                        <a href="tel:+55${cleanPhone(item.contato)}" class="phone-btn">
-                            📞 ${item.contato}
+                        <a href="${href}" ${targetAttr} class="${btnClass}">
+                            ${item.whatsapp ? whatsappSvg : '📞'} ${item.contato}
                         </a>
                     </div>
                 `;
